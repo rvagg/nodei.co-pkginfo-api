@@ -1,0 +1,21 @@
+{
+  "name": "nodei.co-pkginfo-api",
+  "version": "0.0.0",
+  "description": "https://nodei.co - Node.js badges, that's all",
+  "main": "server.js",
+  "author": "Rod Vagg <r@va.gg> (https://github.com/rvagg)",
+  "license": "MIT",
+  "dependencies": {
+    "after": "~0.8.1",
+    "bole": "~1.0.0",
+    "jsonist": "~0.1.1",
+    "level": "~0.18.0",
+    "level-sublevel": "~6.2.2",
+    "level-ttl": "~0.6.1",
+    "level-ttl-cache": "~0.2.0",
+    "node-uuid": "~1.4.1",
+    "routes-router": "~4.1.0",
+    "send-data": "~3.3.2"
+  },
+  "private": true
+}
