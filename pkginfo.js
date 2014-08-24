@@ -46,7 +46,8 @@ function loadDepends (pkg, callback) {
     if (err)
       return callback(err)
 
-    if (!doc.rows) return callback(new Error('bad dependedUpon document'))
+    if (!doc.rows)
+      return callback(new Error('bad dependedUpon document'))
     callback(null, doc.rows.length)
   })
 }
@@ -81,7 +82,7 @@ function loadDoc (pkg, callback) {
       , version      : version
       , updated      : new Date(doc.time[version])
       , dependencies : latest && latest.dependencies
-          && Object.keys(latest.dependencies).length
+          && Object.keys(latest.dependencies).length || 0
       , stars        : doc.users && Object.keys(doc.users).length
       , preferGlobal : latest && latest.preferGlobal
     })
@@ -105,7 +106,7 @@ function pkginfo (pkg, options, callback) {
     if (!doc)
       return callback(new Error('Could not fetch doc from npm'))
 
-    doc.depended  = depended
+    doc.depended = depended
     callback(null, doc)
   }
 

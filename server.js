@@ -6,6 +6,7 @@ const http           = require('http')
     , bole           = require('bole')
     , uuid           = require('node-uuid')
     , sendJson       = require('send-data/json')
+    , sendPlain      = require('send-data/plain')
     , sendError      = require('send-data/error')
     , pkginfo        = require('./pkginfo')
 
@@ -49,6 +50,17 @@ function sendData (req, res) {
 
 function pkgInfoRoute (req, res, opts) {
   var qs = querystring.parse(url.parse(req.url).query)
+    , k
+
+  for (k in qs) {
+    if (qs[k] == 'false')
+      qs[k] = false
+    else if (qs[k] == 'true')
+      qs[k] = true
+  }
+
+  res.setHeader('cache-control', 'no-cache')
+
   pkginfo(opts.params.pkg, qs, sendData(req, res))
 }
 
@@ -73,7 +85,7 @@ router.addRoute('/info/:pkg', pkgInfoRoute)
 
 function handler (req, res) {
   if (req.url == '/_status')
-    return sendJson(req, res, { body: { ok: true }, statusCode: 200 })
+    return sendPlain(req, res, 'OK')
 
   // unique logger for each request
   req.log = reqLog(uuid.v4())
