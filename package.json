@@ -10,8 +10,8 @@
     "bole": "~1.0.0",
     "jsonist": "~0.1.1",
     "level": "~0.18.0",
-    "level-ttl": "~2.0.0",
-    "level-ttl-cache": "~2.0.0",
+    "level-ttl": "~2.1.0",
+    "level-ttl-cache": "~2.2.1",
     "node-uuid": "~1.4.1",
     "routes-router": "~4.1.0",
     "send-data": "~3.3.2"
