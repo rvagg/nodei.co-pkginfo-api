@@ -21,14 +21,12 @@ docCache = db.createCache({
     name          : 'doc'
   , ttl           : ttls.doc
   , load          : loadDoc
-  , valueEncoding : 'json'
 })
 
 dependsCache = db.createCache({
     name          : 'depends'
   , ttl           : ttls.depends
   , load          : loadDepends
-  , valueEncoding : 'json'
 })
 
 
@@ -48,7 +46,7 @@ function loadDepends (pkg, callback) {
 
     if (!doc.rows)
       return callback(new Error('bad dependedUpon document'))
-    callback(null, doc.rows.length)
+    callback(null, String(doc.rows.length))
   })
 }
 
@@ -77,7 +75,7 @@ function loadDoc (pkg, callback) {
 
     latest = doc.versions && doc.versions[version]
 
-    callback(null, {
+    callback(null, JSON.stringify({
         name         : doc.name
       , version      : version
       , updated      : new Date(doc.time[version])
@@ -85,7 +83,7 @@ function loadDoc (pkg, callback) {
           && Object.keys(latest.dependencies).length || 0
       , stars        : doc.users && Object.keys(doc.users).length
       , preferGlobal : latest && latest.preferGlobal
-    })
+    }))
   })
 }
 
@@ -111,7 +109,8 @@ function pkginfo (pkg, options, callback) {
   }
 
   docCache.get(pkg, function (err, _doc) {
-    doc = _doc
+    if (!err)
+      doc = JSON.parse(_doc)
     done(err)
   })
 
@@ -120,7 +119,8 @@ function pkginfo (pkg, options, callback) {
     process.nextTick(function () {
       //FIXME: LevelCache seems to need a nextTick
       dependsCache.get(pkg, function (err, _depended) {
-        depended = _depended
+        if (!err)
+          depended = parseInt(_depended, 10)
         done(err)
       })
     })

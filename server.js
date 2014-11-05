@@ -9,6 +9,7 @@ const http           = require('http')
     , sendPlain      = require('send-data/plain')
     , sendError      = require('send-data/error')
     , pkginfo        = require('./pkginfo')
+    , userPackages   = require('./user-packages')
 
     , log            = bole('server')
     , reqLog         = bole('server:request')
@@ -65,6 +66,11 @@ function pkgInfoRoute (req, res, opts) {
 }
 
 
+function userPackagesRoute (req, res, opts) {
+  userPackages(opts.params.user, sendData(req, res))
+}
+
+
 var router = Router({
     errorHandler: function (req, res, err) {
       req.log.error(err)
@@ -81,6 +87,7 @@ var router = Router({
 
 
 router.addRoute('/info/:pkg', pkgInfoRoute)
+router.addRoute('/user-packages/:user', userPackagesRoute)
 
 
 function handler (req, res) {
