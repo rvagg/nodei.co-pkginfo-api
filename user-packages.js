@@ -5,7 +5,7 @@ const jsonist     = require('jsonist')
     , registryUrl = 'https://skimdb.npmjs.com/registry/'
     , pkgListUrl  = registryUrl + '_design/app/_view/byUser?startkey={user}&endkey={user}'
 
-    , cacheTtl    = 1000 * 60 * 2 // 2 minutes
+    , cacheTtl    = 1000 * 60 * 10 // 10 minutes
 
 
 var pkgListCache = db.createCache({
