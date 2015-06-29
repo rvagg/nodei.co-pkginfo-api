@@ -18,6 +18,9 @@ const http           = require('http')
     , port           = process.env.PORT || 3000
     , start          = new Date()
 
+    // inherited from nodei.co/lib/valid-name.js
+    , pkgregex       = '@?\\w*/?[^/@\\s\\+%:]+'
+
 
 bole.output({
   level  : isDev ? 'debug' : 'info',
@@ -86,8 +89,8 @@ var router = Router({
 })
 
 
-router.addRoute('/info/:pkg', pkgInfoRoute)
-router.addRoute('/user-packages/:user', userPackagesRoute)
+router.addRoute(`/info/:pkg(${pkgregex})` , pkgInfoRoute)
+router.addRoute('/user-packages/:user'    , userPackagesRoute)
 
 
 function handler (req, res) {
