@@ -1,14 +1,16 @@
+'use strict'
+
 const jsonist     = require('jsonist')
 
     , db          = require('./db')
 
     , registryUrl = 'https://skimdb.npmjs.com/registry/'
-    , pkgListUrl  = registryUrl + '_design/app/_view/byUser?startkey={user}&endkey={user}'
+    , pkgListUrl  = `${registryUrl}_design/app/_view/byUser?startkey={user}&endkey={user}`
 
-    , cacheTtl    = 1000 * 60 * 10 // 10 minutes
+    , cacheTtl    = 1000 * 60 * 1//0 // 10 minutes
 
 
-var pkgListCache = db.createCache({
+const pkgListCache = db.createCache({
     name          : 'userPkgList'
   , ttl           : cacheTtl
   , load          : loadPkgList
@@ -16,18 +18,16 @@ var pkgListCache = db.createCache({
 
 
 function loadPkgList (user, callback) {
-  var url = pkgListUrl.replace(/\{user\}/g, JSON.stringify(user))
+  let url = pkgListUrl.replace(/\{user\}/g, JSON.stringify(user))
 
-  jsonist.get(url, function (err, doc) {
+  jsonist.get(url, (err, doc) => {
     if (err)
       return callback(err)
 
     if (doc && Array.isArray(doc.rows)) {
-      var data = doc.rows.map(function (row) {
-        return row.id
-      }).filter(function (pkg) {
-        return pkg !== null && pkg !== undefined && pkg !== ''
-      })
+      let data = doc.rows.map((row) => row.id)
+          .filter((pkg) => pkg !== null && pkg !== undefined && pkg !== '')
+
       return callback(null, JSON.stringify(data))
     }
 
@@ -37,7 +37,7 @@ function loadPkgList (user, callback) {
 
 
 function userPackages (user, callback) {
-  pkgListCache.get(user, function (err, doc) {
+  pkgListCache.get(user, (err, doc) => {
     if (err)
       return callback(err)
 

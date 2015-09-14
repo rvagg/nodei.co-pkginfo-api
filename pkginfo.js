@@ -1,11 +1,12 @@
+'use strict'
+
 const jsonist     = require('jsonist')
     , qs          = require('querystring')
     , after       = require('after')
     , db          = require('./db')
-    , log         = require('bole')('db')
 
     , registryUrl = 'https://skimdb.npmjs.com/registry/'
-    , dependedUrl = registryUrl + '_design/app/_view/dependedUpon?'
+    , dependedUrl = `${registryUrl}_design/app/_view/dependedUpon?`
 
     , ttls        = {
           doc       : 1000 * 60 * 1  // 1 minute
@@ -13,7 +14,7 @@ const jsonist     = require('jsonist')
       }
 
 
-var dependsCache
+let dependsCache
   , docCache
 
 
@@ -31,7 +32,7 @@ dependsCache = db.createCache({
 
 
 function loadDepends (pkg, callback) {
-  var query = {
+  let query = {
           group_level : 3
         , startkey    : JSON.stringify([ pkg ])
         , endkey      : JSON.stringify([ pkg, {} ])
@@ -40,38 +41,37 @@ function loadDepends (pkg, callback) {
       }
     , url = dependedUrl + qs.stringify(query)
 
-  jsonist.get(url, function (err, doc) {
+  jsonist.get(url, (err, doc) => {
     if (err)
       return callback(err)
 
     if (!doc.rows)
       return callback(new Error('bad dependedUpon document'))
+
     callback(null, String(doc.rows.length))
   })
 }
 
 
 function loadDoc (pkg, callback) {
-  jsonist.get(registryUrl + pkg, function (err, doc) {
+  jsonist.get(registryUrl + pkg, (err, doc) => {
     if (err)
       return callback(err)
 
-    var version
+    let version
       , latest
 
     if (doc.error)
-      return callback(new Error(
-          'registry error: '
-          + doc.error
-          + ' ('
-          + (doc.reason || 'reason unknown')
-          + ')'))
+      return callback(new Error(`registry error: ${doc.error} (${(doc.reason || 'reason unknown')})`))
 
-    if (!doc.name) return callback(new Error('no name found'))
-    if (!doc['dist-tags']) return callback(new Error('no dit-tags found'))
+    if (!doc.name)
+      return callback(new Error('no name found'))
+    if (!doc['dist-tags'])
+      return callback(new Error('no dit-tags found'))
     if (!(version = doc['dist-tags'].latest))
        return callback(new Error('no dist-tags.latest found'))
-    if (!doc.time[version]) return callback(new Error('no version time'))
+    if (!doc.time[version])
+      return callback(new Error('no version time'))
 
     latest = doc.versions && doc.versions[version]
 
@@ -89,7 +89,7 @@ function loadDoc (pkg, callback) {
 
 
 function pkginfo (pkg, options, callback) {
-  var doc
+  let doc
     , depended
     , done = after(1, _done)
 
@@ -108,7 +108,7 @@ function pkginfo (pkg, options, callback) {
     callback(null, doc)
   }
 
-  docCache.get(pkg, function (err, _doc) {
+  docCache.get(pkg, (err, _doc) => {
     if (!err)
       doc = JSON.parse(_doc)
     done(err)
@@ -116,9 +116,9 @@ function pkginfo (pkg, options, callback) {
 
   if (!options.nodepends && !options.mini) {
     done.count++
-    process.nextTick(function () {
+    process.nextTick(() => {
       //FIXME: LevelCache seems to need a nextTick
-      dependsCache.get(pkg, function (err, _depended) {
+      dependsCache.get(pkg, (err, _depended) => {
         if (!err)
           depended = parseInt(_depended, 10)
         done(err)

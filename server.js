@@ -1,3 +1,5 @@
+'use strict'
+
 const http           = require('http')
     , fs             = require('fs')
     , url            = require('url')
@@ -28,7 +30,7 @@ bole.output({
 })
 
 if (process.env.LOG_FILE) {
-  console.log('Starting logging to %s', process.env.LOG_FILE)
+  console.log(`Starting logging to ${process.env.LOG_FILE}`)
   bole.output({
     level  : 'debug',
     stream : fs.createWriteStream(process.env.LOG_FILE)
@@ -36,7 +38,7 @@ if (process.env.LOG_FILE) {
 }
 
 
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', (err) => {
   log.error(err)
   process.exit(1)
 })
@@ -53,7 +55,7 @@ function sendData (req, res) {
 
 
 function pkgInfoRoute (req, res, opts) {
-  var qs = querystring.parse(url.parse(req.url).query)
+  let qs = querystring.parse(url.parse(req.url).query)
     , k
 
   for (k in qs) {
@@ -74,13 +76,13 @@ function userPackagesRoute (req, res, opts) {
 }
 
 
-var router = Router({
-    errorHandler: function (req, res, err) {
+const router = Router({
+    errorHandler: (req, res, err) => {
       req.log.error(err)
       sendError(req, res, err)
     }
 
-  , notFound: function (req, res) {
+  , notFound: (req, res) => {
       sendJson(req, res, {
           body: { 'error': 'Not found: ' + req.url }
         , statusCode: 404
@@ -119,8 +121,8 @@ http.createServer(handler)
       throw err
     }
 
-    log.info('Server started on port %d', port)
+    log.info(`Server started on port ${port}`)
     console.log()
-    console.log('>> Running: http://localhost:' + port)
+    console.log(`>> Running: http://localhost:${port}`)
     console.log()
   })
