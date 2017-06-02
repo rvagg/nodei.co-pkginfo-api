@@ -41,7 +41,9 @@ function loadDepends (pkg, callback) {
       }
     , url = dependedUrl + qs.stringify(query)
 
-  jsonist.get(url, (err, doc) => {
+  jsonist.get(url, afterDependsGet)
+
+  function afterDependsGet (err, doc) {
     if (err)
       return callback(err)
 
@@ -49,12 +51,12 @@ function loadDepends (pkg, callback) {
       return callback(new Error('bad dependedUpon document'))
 
     callback(null, String(doc.rows.length))
-  })
+  }
 }
 
 
 function loadDoc (pkg, callback) {
-  jsonist.get(registryUrl + pkg, (err, doc) => {
+  function afterDocGet (err, doc) {
     if (err)
       return callback(err)
 
@@ -65,13 +67,14 @@ function loadDoc (pkg, callback) {
       return callback(new Error(`registry error: ${doc.error} (${(doc.reason || 'reason unknown')})`))
 
     if (!doc.name)
-      return callback(new Error('no name found'))
+      return callback(new Error(`no name field found for ${pkg}`))
     if (!doc['dist-tags'])
-      return callback(new Error('no dit-tags found'))
+      return callback(new Error(`no dit-tags found for ${pkg}`))
     if (!(version = doc['dist-tags'].latest))
-       return callback(new Error('no dist-tags.latest found'))
+       return callback(new Error(`no dist-tags.latest found for ${pkg}`))
+    version = version.replace(/^v/, '') // skimdb weirdness, seen in node-sass
     if (!doc.time[version])
-      return callback(new Error('no version time'))
+      return callback(new Error(`no version time for ${pkg}@${version}`))
 
     latest = doc.versions && doc.versions[version]
 
@@ -84,7 +87,9 @@ function loadDoc (pkg, callback) {
       , stars        : doc.users && Object.keys(doc.users).length
       , preferGlobal : latest && latest.preferGlobal
     }))
-  })
+  }
+
+  jsonist.get(registryUrl + pkg, afterDocGet)
 }
 
 
@@ -108,22 +113,28 @@ function pkginfo (pkg, options, callback) {
     callback(null, doc)
   }
 
-  docCache.get(pkg, (err, _doc) => {
+  docCache.get(pkg, afterDocCacheGet)
+
+  function afterDocCacheGet (err, _doc) {
     if (!err)
       doc = JSON.parse(_doc)
     done(err)
-  })
+  }
 
   if (!options.nodepends && !options.mini) {
     done.count++
-    process.nextTick(() => {
+    process.nextTick(deferredDependsCacheLoad)
+
+    let deferredDependsCacheLoad = () => {
       //FIXME: LevelCache seems to need a nextTick
-      dependsCache.get(pkg, (err, _depended) => {
+      dependsCache.get(pkg, afterDependsCacheGet)
+
+      function afterDependsCacheGet (err, _depended) {
         if (!err)
           depended = parseInt(_depended, 10)
         done(err)
-      })
-    })
+      }
+    }
   }
 }
 

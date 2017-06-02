@@ -37,6 +37,8 @@ if (process.env.LOG_FILE) {
   })
 }
 
+if (process.env.NODE_TITLE)
+  process.title = process.env.NODE_TITLE
 
 process.on('uncaughtException', (err) => {
   log.error(err)
@@ -47,7 +49,7 @@ process.on('uncaughtException', (err) => {
 function sendData (req, res) {
   return function (err, data) {
     if (err)
-      return sendError(req, res)
+      return sendError(req, res, { body: err })
 
     sendJson(req, res, { body: data, statusCode: 200 })
   }
